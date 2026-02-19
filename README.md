@@ -187,7 +187,7 @@ Zero external dependencies. Pure Python stdlib (urllib, json, smtplib).
 
 Don't want to manage your own setup? Use the hosted version — just fill in 5 fields and get a report:
 
-**[redditmonitor.com](https://redditmonitor.com)** *(coming soon)*
+**[redditmonitor.jaskaranbedi.com](https://redditmonitor.jaskaranbedi.com)**
 
 ---
 
