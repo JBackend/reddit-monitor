@@ -1,0 +1,80 @@
+name: Reddit Monitor
+
+on:
+  schedule:
+    # Daily Mon-Fri at 8 AM UTC
+    - cron: '0 8 * * 1-5'
+    # Weekly comprehensive every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Determine run mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "$(date +%u)" = "1" ] && [ "$(date +%H)" = "09" ]; then
+            echo "mode=weekly" >> $GITHUB_OUTPUT
+          else
+            echo "mode=daily" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run monitor
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -m reddit_monitor monitor --${{ steps.mode.outputs.mode }} --analyze
+
+      - name: Copy report to docs
+        run: |
+          cp data/reports/analysis.md docs/report.md 2>/dev/null || true
+          cp data/reports/latest.md docs/latest-raw.md 2>/dev/null || true
+
+      - name: Send email report
+        if: always()
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          if [ -n "$SMTP_SERVER" ] && [ -f "data/reports/analysis.md" ]; then
+            python -c "
+          from reddit_monitor.email_report import send_report
+          send_report()
+          " || echo "Email sending failed (non-fatal)"
+          else
+            echo "Email not configured or no report generated — skipping"
+          fi
+
+      - name: Commit data updates
+        run: |
+          git config user.name "Reddit Monitor Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ docs/report.md docs/latest-raw.md 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Update: ${{ steps.mode.outputs.mode }} run $(date -u +%Y-%m-%d)"
+          git push

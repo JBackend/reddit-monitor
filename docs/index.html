@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reddit Monitor — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0a; --bg-raised: #111111; --bg-hover: #1a1a1a;
+            --border: #222222; --border-light: #1a1a1a;
+            --text: #e5e5e5; --text-secondary: #888888; --text-muted: #555555;
+            --accent: #ffffff; --link: #8ab4f8; --green: #22c55e;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', -apple-system, sans-serif; font-size: 15px; line-height: 1.7; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+        nav { position: sticky; top: 0; z-index: 10; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-light); }
+        .nav-inner { max-width: 760px; margin: 0 auto; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { font-weight: 600; font-size: 0.9rem; color: var(--accent); }
+        .nav-meta { font-size: 0.75rem; color: var(--text-muted); }
+        main { max-width: 760px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+        .hero { padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+        .hero h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; color: var(--accent); }
+        .hero-sub { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.35rem; }
+        .accordion-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .accordion { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+        .accordion:hover { border-color: #333; }
+        .accordion.open { border-color: #333; }
+        .accordion-header { width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; background: var(--bg-raised); border: none; color: var(--text); font-family: inherit; font-size: inherit; cursor: pointer; text-align: left; transition: background 0.2s; }
+        .accordion-header:hover { background: var(--bg-hover); }
+        .accordion-title { flex: 1; }
+        .accordion-title strong { font-size: 0.9rem; font-weight: 600; }
+        .accordion-chevron { width: 18px; height: 18px; flex-shrink: 0; position: relative; }
+        .accordion-chevron::before { content: ''; position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; border-right: 1.5px solid var(--text-muted); border-bottom: 1.5px solid var(--text-muted); transform: translate(-50%,-60%) rotate(45deg); transition: transform 0.2s; }
+        .accordion.open .accordion-chevron::before { transform: translate(-50%,-40%) rotate(-135deg); }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; padding: 0 1rem; }
+        .accordion.open .accordion-body { max-height: 2000px; padding: 0.75rem 1rem 1.25rem; }
+        .section-number { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+        h1.report-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; color: var(--accent); margin: 0 0 0.5rem; }
+        h2 { font-size: 1rem; font-weight: 600; color: var(--accent); margin: 0 0 0.75rem; }
+        h3 { font-size: 0.9rem; font-weight: 600; color: var(--text); margin: 1.25rem 0 0.4rem; }
+        p { margin: 0.4rem 0; color: var(--text); font-size: 0.9rem; }
+        p.meta { color: var(--text-muted); font-size: 0.8rem; font-style: italic; }
+        strong { font-weight: 600; color: var(--accent); }
+        em { font-style: italic; color: var(--text-secondary); }
+        code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.82em; background: var(--bg-raised); border: 1px solid var(--border); padding: 0.15em 0.4em; border-radius: 4px; color: var(--link); }
+        a { color: var(--link); text-decoration: none; }
+        a:hover { color: var(--accent); }
+        ul { margin: 0.5rem 0 0.75rem 1.25rem; list-style: none; }
+        ul li { position: relative; padding-left: 1rem; margin: 0.3rem 0; font-size: 0.9rem; }
+        ul li::before { content: '\00B7'; position: absolute; left: 0; color: var(--text-muted); font-weight: 700; }
+        blockquote { border-left: 2px solid var(--border); padding: 0.4rem 1rem; margin: 0.6rem 0; color: var(--text-secondary); font-size: 0.85rem; }
+        .table-wrap { overflow-x: auto; margin: 0.75rem 0 1rem; border: 1px solid var(--border); border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82rem; line-height: 1.5; }
+        th { text-align: left; padding: 0.6rem 0.75rem; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); background: var(--bg-raised); border-bottom: 1px solid var(--border); }
+        td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--bg-hover); }
+        hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+        p, h3, li, td, th, strong { overflow-wrap: break-word; }
+        .loading { display: flex; align-items: center; gap: 0.75rem; padding: 3rem 0; color: var(--text-muted); font-size: 0.85rem; }
+        .loading-dot { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+        .empty-state { text-align: center; color: var(--text-muted); padding: 3rem 1rem; font-size: 0.9rem; }
+        footer { border-top: 1px solid var(--border); }
+        .footer-inner { max-width: 760px; margin: 0 auto; padding: 1.5rem; font-size: 0.75rem; color: var(--text-muted); }
+        .footer-inner a { color: var(--text-secondary); }
+        @media (max-width: 640px) { main { padding: 0 1rem 3rem; } .hero h1 { font-size: 1.4rem; } table { font-size: 0.75rem; } th, td { padding: 0.4rem 0.5rem; } }
+        @media print { body { background: #fff; color: #111; } nav, footer { display: none; } main { max-width: 100%; padding: 0; } .accordion-body { max-height: none !important; padding: 0.75rem 1rem !important; } th { background: #f5f5f5; color: #333; } a, strong, code { color: #111; } }
+    </style>
+</head>
+<body>
+    <nav><div class="nav-inner"><span class="nav-brand">Reddit Monitor</span><span class="nav-meta" id="timestamp"></span></div></nav>
+    <main>
+        <div class="hero">
+            <h1>Brand Intelligence</h1>
+            <p class="hero-sub">AI-powered competitive analysis from Reddit discussions</p>
+        </div>
+        <div id="report-content">
+            <div class="loading"><div class="loading-dot"></div><span>Loading report...</span></div>
+        </div>
+    </main>
+    <footer><div class="footer-inner">Built with <a href="https://github.com/JBackend/reddit-monitor" target="_blank">Reddit Monitor</a> &middot; Claude + Reddit public API</div></footer>
+    <script>
+    document.getElementById('timestamp').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.addEventListener('click', e => { const h = e.target.closest('.accordion-header'); if (!h) return; const a = h.parentElement; const w = a.classList.contains('open'); a.parentElement.querySelectorAll(':scope > .accordion').forEach(x => x.classList.remove('open')); if (!w) a.classList.add('open'); });
+    fetch('report.md').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); }).then(md => { document.getElementById('report-content').innerHTML = renderReport(md); const f = document.querySelector('#report-content .accordion'); if (f) f.classList.add('open'); }).catch(() => { document.getElementById('report-content').innerHTML = '<p class="empty-state">No report yet. Run the monitor first:<br><code>python -m reddit_monitor monitor --daily --analyze</code></p>'; });
+    function renderReport(md) { const lines = md.split('\n'); const sections = []; let current = null, headerLines = []; for (const line of lines) { if (line.startsWith('## ')) { if (current) sections.push(current); current = { title: line.slice(3).trim(), lines: [] }; } else if (current) { current.lines.push(line); } else { headerLines.push(line); } } if (current) sections.push(current); let html = renderBlock(headerLines); if (sections.length) { html += '<div class="accordion-group">'; sections.forEach((s, i) => { html += `<div class="accordion report-section"><button class="accordion-header"><div class="section-number">${i+1}</div><div class="accordion-title"><strong>${inl(s.title)}</strong></div><span class="accordion-chevron"></span></button><div class="accordion-body">${renderBlock(s.lines)}</div></div>`; }); html += '</div>'; } return html; }
+    function splitTableRow(line) { const t = line.trim().slice(1,-1); const cells = []; let cur = '', bold = false; for (let j = 0; j < t.length; j++) { if (t[j]==='*'&&t[j+1]==='*') { bold=!bold; cur+='**'; j++; continue; } if (t[j]==='|'&&!bold) { cells.push(cur); cur=''; continue; } cur+=t[j]; } cells.push(cur); return cells; }
+    function renderBlock(lines) { let html='',inList=false,inBQ=false,inTbl=false,hdrDone=false; for (let i=0;i<lines.length;i++) { let ln=lines[i]; if (inList&&!ln.startsWith('- ')) { html+='</ul>'; inList=false; } if (inBQ&&!ln.startsWith('>')) { html+='</blockquote>'; inBQ=false; } if (ln.trim().startsWith('|')&&ln.trim().endsWith('|')) { let cells=splitTableRow(ln); if (cells.every(c=>/^[\s\-:]+$/.test(c))) { hdrDone=true; continue; } if (!inTbl) { html+='<div class="table-wrap"><table>'; inTbl=true; hdrDone=false; } let tag=!hdrDone?'th':'td'; html+='<tr>'+cells.map(c=>`<${tag}>${inl(c.trim())}</${tag}>`).join('')+'</tr>'; continue; } else if (inTbl) { html+='</table></div>'; inTbl=false; } if (ln.trim()==='---') { html+='<hr>'; continue; } if (ln.startsWith('### ')) { html+='<h3>'+inl(ln.slice(4))+'</h3>'; continue; } if (ln.startsWith('# ')) { html+='<h1 class="report-title">'+inl(ln.slice(2))+'</h1>'; continue; } if (ln.startsWith('- ')) { if (!inList) { html+='<ul>'; inList=true; } html+='<li>'+inl(ln.slice(2))+'</li>'; continue; } if (/^\d+\.\s/.test(ln)) { html+='<p class="ol-item">'+inl(ln)+'</p>'; continue; } if (ln.startsWith('> ')) { if (!inBQ) { html+='<blockquote>'; inBQ=true; } html+='<p>'+inl(ln.slice(2))+'</p>'; continue; } if (/^\*[^*]+\*$/.test(ln.trim())) { html+='<p class="meta">'+inl(ln)+'</p>'; continue; } if (ln.trim()==='') continue; html+='<p>'+inl(ln)+'</p>'; } if (inList) html+='</ul>'; if (inBQ) html+='</blockquote>'; if (inTbl) html+='</table></div>'; return html; }
+    function inl(t) { t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); t=t.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g,'<em>$1</em>'); t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>'); t=t.replace(/`([^`]+)`/g,'<code>$1</code>'); return t; }
+    </script>
+</body>
+</html>
