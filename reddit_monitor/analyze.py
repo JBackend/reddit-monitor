@@ -57,7 +57,21 @@ def _build_prompt(posts_data, cfg):
     # Format posts for the prompt
     posts_text = []
     for p in posts_data[:50]:  # Cap at 50 posts to stay within context
+        # Format the post date from created_utc timestamp
+        post_date = ""
+        if p.get("created_utc"):
+            try:
+                dt = datetime.fromtimestamp(p["created_utc"], tz=timezone.utc)
+                post_date = dt.strftime("%b %Y")
+            except (OSError, ValueError):
+                post_date = ""
+
+        post_url = p.get("url", "")
         entry = f"[{p.get('_priority', 'MEDIUM')}] r/{p['subreddit']} | {p['score']}pts | {p['num_comments']} comments\n"
+        if post_date:
+            entry += f"Date: {post_date}\n"
+        if post_url:
+            entry += f"URL: {post_url}\n"
         entry += f"Title: {p['title']}\n"
         if p.get("selftext"):
             entry += f"Text: {p['selftext'][:500]}\n"
@@ -96,6 +110,20 @@ Produce a structured brand intelligence report in markdown with these sections:
 8. **Quote Bank** — Key Reddit quotes with source and insight. Table format.
 
 9. **Summary** — 4-5 bullet executive summary with strategic focus areas.
+
+## Citation Requirements
+
+Every major claim, insight, or data point MUST include an inline citation linking back to the source Reddit post. Use markdown links in this format:
+
+([r/subredditname, Mon YYYY](URL))
+
+For example: "Users find onboarding confusing ([r/humanresources, Jan 2025](https://reddit.com/...))."
+
+- Each post above includes a Date and URL field — use these for citations.
+- Every insight, quote, or claim should cite at least one source post.
+- Place citations inline immediately after the relevant claim, inside parentheses.
+- In tables, include citations in the relevant cell alongside the evidence.
+- If multiple posts support one claim, cite them all: ([r/sub1, Jan 2025](url1), [r/sub2, Feb 2025](url2)).
 
 Be specific. Use actual quotes and usernames from the data. Be direct about weaknesses — this is an internal report, not marketing copy."""
 

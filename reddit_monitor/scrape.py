@@ -7,10 +7,10 @@ from . import api
 
 def run_scrape(cfg):
     """Run the one-shot scraper. Returns a summary dict."""
-    settings = cfg["settings"]
-    user_agent = settings["user_agent"]
-    rate_delay = settings["rate_delay"]
-    max_results = settings["max_results_per_query"]
+    settings = cfg.get("settings", {})
+    user_agent = settings.get("user_agent", "reddit-monitor/1.0")
+    rate_delay = settings.get("rate_delay", 2)
+    max_results = settings.get("max_results_per_query", 25)
 
     # Paths
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

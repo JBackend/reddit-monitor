@@ -58,17 +58,17 @@ def scan_comments_for_brands(comments, brand_aliases, competitor_names):
 
 def run_monitor(cfg, mode="daily"):
     """Run the monitor. Returns a summary dict."""
-    # Extract config values
+    # Extract config values (all optional fields use .get() with safe defaults)
     brand_name = cfg["brand"]["name"]
-    brand_aliases = [a.lower() for a in cfg["brand"]["aliases"]]
-    competitor_names = [c.lower() for c in cfg["competitors"]["names"]]
-    high_value_subs = set(s.lower() for s in cfg["subreddits"]["high_value"])
-    relevance_kw = [k.lower() for k in cfg["keywords"]["relevance"]]
-    geographic = [g.lower() for g in cfg["keywords"]["geographic"]]
-    settings = cfg["settings"]
-    user_agent = settings["user_agent"]
-    rate_delay = settings["rate_delay"]
-    max_results = settings["max_results_per_query"]
+    brand_aliases = [a.lower() for a in cfg["brand"].get("aliases", [])]
+    competitor_names = [c.lower() for c in cfg.get("competitors", {}).get("names", [])]
+    high_value_subs = set(s.lower() for s in cfg.get("subreddits", {}).get("high_value", []))
+    relevance_kw = [k.lower() for k in cfg.get("keywords", {}).get("relevance", [])]
+    geographic = [g.lower() for g in cfg.get("keywords", {}).get("geographic", [])]
+    settings = cfg.get("settings", {})
+    user_agent = settings.get("user_agent", "reddit-monitor/1.0")
+    rate_delay = settings.get("rate_delay", 2)
+    max_results = settings.get("max_results_per_query", 25)
     max_comments = settings.get("max_comments_to_fetch", 15)
     min_comments = settings.get("min_comments_for_fetch", 5)
     max_seen = settings.get("max_seen_ids", 5000)

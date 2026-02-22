@@ -8,6 +8,22 @@ def generate_report(new_posts, posts_with_comments, brand_findings, run_mode, ru
     lines = []
     lines.append(f"# Reddit Monitor Report — {run_time.strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append("")
+
+    # Date range of analyzed posts
+    if new_posts:
+        timestamps = [p["created_utc"] for p in new_posts if "created_utc" in p]
+        if timestamps:
+            earliest = datetime.fromtimestamp(min(timestamps), tz=timezone.utc)
+            latest = datetime.fromtimestamp(max(timestamps), tz=timezone.utc)
+            fmt = lambda dt: dt.strftime("%b %d, %Y")
+            date_range = f"**Posts from: {fmt(earliest)} – {fmt(latest)} | {len(new_posts)} posts analyzed**"
+        else:
+            date_range = f"**{len(new_posts)} posts analyzed**"
+    else:
+        date_range = "**No posts found**"
+    lines.append(date_range)
+    lines.append("")
+
     lines.append(f"**Mode:** {run_mode} | **New posts found:** {len(new_posts)}")
     lines.append("")
 

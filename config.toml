@@ -1,17 +1,21 @@
+# ── Required fields ─────────────────────────────────────────
 [brand]
-name = "Rise People"
-aliases = ["rise people", "risepeople", "risepeople.com", "rise hr", "rise payroll"]
+name = "Rise People"                # REQUIRED
+industry = "HR Payroll"             # REQUIRED
+aliases = ["rise people", "risepeople", "risepeople.com", "rise hr", "rise payroll"]  # Optional — auto-derived from brand name if omitted
 
 [competitors]
-names = ["humi", "payworks", "wagepoint", "knit people", "adp", "dayforce", "ceridian", "deel", "employment hero", "folks hr", "collage hr", "gusto", "bamboohr", "bamboo hr", "rippling"]
+names = ["humi", "payworks", "wagepoint", "knit people", "adp", "dayforce", "ceridian", "deel", "employment hero", "folks hr", "collage hr", "gusto", "bamboohr", "bamboo hr", "rippling"]  # REQUIRED
 
+# ── Optional fields (smart defaults derived from brand + industry + competitors) ──
 [subreddits]
-high_value = ["humanresources", "payroll", "bookkeeping", "personalfinancecanada", "smallbusiness", "smallbusinesscanada", "canadasmallbusiness", "entrepreneurcanada", "entrepreneur", "startup", "sysadmin", "accounting", "cantax", "saas"]
+high_value = ["humanresources", "payroll", "bookkeeping", "personalfinancecanada", "smallbusiness", "smallbusinesscanada", "canadasmallbusiness", "entrepreneurcanada", "entrepreneur", "startup", "sysadmin", "accounting", "cantax", "saas"]  # Optional — auto-derived from industry if omitted
 
 [keywords]
-relevance = ["payroll", "hr software", "hris", "human resources", "onboarding", "benefits admin", "time tracking", "canada", "canadian", "small business", "startup", "employee management"]
-geographic = ["canada", "canadian", "toronto", "vancouver", "montreal", "calgary", "ottawa"]
+relevance = ["payroll", "hr software", "hris", "human resources", "onboarding", "benefits admin", "time tracking", "canada", "canadian", "small business", "startup", "employee management"]  # Optional — auto-derived from industry if omitted
+geographic = ["canada", "canadian", "toronto", "vancouver", "montreal", "calgary", "ottawa"]  # Optional — defaults to empty list if omitted
 
+# ── Optional query definitions (auto-generated from brand/industry/competitors if omitted) ──
 [[queries.daily]]
 label = "rise_direct"
 query = '"Rise People" OR "RisePeople" OR "risepeople.com"'
@@ -219,6 +223,7 @@ label = "canada_hr"
 query = 'payroll software OR "HR software" Canada'
 subreddit = "canada"
 
+# ── Optional sections (sensible defaults used if omitted) ──
 [analysis]
 # Optional: AI-powered brand intelligence using Claude API
 # Set ANTHROPIC_API_KEY as an environment variable (or GitHub Secret) instead of putting it here
