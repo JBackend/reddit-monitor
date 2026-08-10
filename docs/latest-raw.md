@@ -1,8 +1,8 @@
-# Reddit Monitor Report — 2026-08-07 09:07 UTC
+# Reddit Monitor Report — 2026-08-10 09:39 UTC
 
 **No posts found**
 
-**Mode:** daily | **New posts found:** 0
+**Mode:** weekly | **New posts found:** 0
 
 **0 HIGH** | **0 MEDIUM**
 
